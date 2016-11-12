@@ -1,5 +1,9 @@
 package kku.thanawut.easykku;
 
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,6 +21,7 @@ public class SignUpActivity extends AppCompatActivity {
     private ImageView imageView;
     private Button button;
     private String nameString, phoneString,userString, passwordString;
+    private Uri uri;
 
 
 
@@ -52,11 +57,43 @@ public class SignUpActivity extends AppCompatActivity {
                             "มีช่องว่าง", "กรุณากรอกให้ครบทุกช่อง");
                     myAlert.myDialog();
 
+
                 }
 
+            } // onClick
+        });
+        //Image controller
+        imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("image/*");
+                startActivityForResult(Intent.createChooser(intent,"โปรดเลือกแอปภาพ"),0);
             } // onClick
         });
 
 
     } //Main Method
+
+    @Override
+    protected void onActivityResult(int requestCode,
+                                    int resultCode,
+                                    Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if ((requestCode==0) && (resultCode== RESULT_OK)) {
+            Log.d("12novV1", "Result OK");
+            //show Image
+            uri = data.getData();
+            try {
+                Bitmap bitmap = BitmapFactory.decodeStream(getContentResolver()
+                        .openInputStream(uri));
+                imageView.setImageBitmap(bitmap);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+
+    } //onActivity
 } // Main Class
