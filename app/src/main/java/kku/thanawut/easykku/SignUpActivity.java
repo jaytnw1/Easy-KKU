@@ -1,9 +1,12 @@
 package kku.thanawut.easykku;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.StrictMode;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,6 +15,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 
+import org.jibble.simpleftp.SimpleFTP;
+
+import java.io.File;
 import java.nio.channels.Channels;
 
 public class SignUpActivity extends AppCompatActivity {
@@ -20,8 +26,11 @@ public class SignUpActivity extends AppCompatActivity {
             userEditText, passwordEditText;
     private ImageView imageView;
     private Button button;
-    private String nameString, phoneString,userString, passwordString;
+    private String nameString, phoneString,userString, passwordString,
+            imageParhString, imagrNameString;
     private Uri uri;
+    private boolean aBoolean = true;
+
 
 
 
@@ -57,8 +66,18 @@ public class SignUpActivity extends AppCompatActivity {
                             "มีช่องว่าง", "กรุณากรอกให้ครบทุกช่อง");
                     myAlert.myDialog();
 
+                } else if (aBoolean) {
+                    //Non Choose Image
+                    MyAlert myAlert = new MyAlert(SignUpActivity.this, R.drawable.nobita48,
+                            "ยังไม่เลือกรูป", "กรุณาเลือกรูปด้วยคะ");
+                    myAlert.myDialog();
+                }else {
+                    //Choose Image OK
+                    upLoadImageToServer();
+
 
                 }
+
 
             } // onClick
         });
@@ -74,6 +93,31 @@ public class SignUpActivity extends AppCompatActivity {
 
 
     } //Main Method
+    private void upLoadImageToServer() {
+      //ChangPolocy
+        StrictMode.ThreadPolicy threadPolicy = new StrictMode.ThreadPolicy
+                .Builder().permitAll().build();
+        StrictMode.setThreadPolicy(threadPolicy);
+
+        try {
+            SimpleFTP simpleFTP = new SimpleFTP();
+            simpleFTP.connect("ftp.swiftcodingthai.com",21,"kku@swiftcoodingthai.com","Abc12345");
+            simpleFTP.bin();
+            simpleFTP.cwd("Image");
+            simpleFTP.stor(new File(imageParhString));
+            simpleFTP.disconnect();
+
+
+
+
+
+        }catch (Exception e){
+            Log.d("12novV1", "e simpleFTP ==>" + e.toString());
+
+        }
+
+    } // upload
+
 
     @Override
     protected void onActivityResult(int requestCode,
@@ -92,8 +136,40 @@ public class SignUpActivity extends AppCompatActivity {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }
+
+            //Find Path of Image
+            imageParhString = myFindPath(uri);
+            Log.d("12novV1", "imagePath ==> " + imageParhString);
+
+            //Find Name of Image
+            imageParhString = imageParhString.substring(imageParhString.lastIndexOf("/"));
+            Log.d("12novV1", "imageName ==> " + imageParhString);
+
+
+
+        } // if
 
 
     } //onActivity
-} // Main Class
+
+    private String myFindPath(Uri uri) {
+
+        String result = null;
+        String[] strings = {MediaStore.Images.Media.DATA};
+        Cursor cursor = getContentResolver().query(uri, strings, null, null, null);
+
+        if (cursor != null) {
+
+            cursor.moveToFirst();
+            int index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            result = cursor.getString(index);
+
+        } else {
+            result = uri.getPath();
+        }
+
+
+        return result;
+    }
+
+}   // Main Class
