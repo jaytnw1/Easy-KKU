@@ -18,10 +18,11 @@
         android:layout_height="wrap_content"
         android:id="@+id/textView"
         android:textSize="@dimen/h1"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:textColor="#ffffff" />
 
     <Button
-        android:text="Button"
+        android:text="@string/SignUP"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/button3"
